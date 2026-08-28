@@ -23,3 +23,8 @@ dev = [
     "mongomock==4.3.0",
     "pymongo==4.17.0",
 ]
+
+[tool.pytest.ini_options]
+# Make /app (the rootdir) importable so tests can reach utils/, auth/, components/
+pythonpath = ["."]
+testpaths = ["tests"]
