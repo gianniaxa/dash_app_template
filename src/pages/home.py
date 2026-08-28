@@ -28,7 +28,8 @@ layout = dbc.Container(
                                         html.H5("Form", className="card-title"),
                                         html.P("User entry form with validation and live table update.", className="card-text text-muted"),
                                         dbc.Button("Go", href="/form", color="primary", size="sm"),
-                                    ])
+                                    ]),
+                                    className="h-100",
                                 ),
                                 md=3,
                             ),
@@ -38,7 +39,8 @@ layout = dbc.Container(
                                         html.H5("Tables", className="card-title"),
                                         html.P("AG Grid vs Dash DataTable side by side.", className="card-text text-muted"),
                                         dbc.Button("Go", href="/tables", color="primary", size="sm"),
-                                    ])
+                                    ]),
+                                    className="h-100",
                                 ),
                                 md=3,
                             ),
@@ -48,7 +50,8 @@ layout = dbc.Container(
                                         html.H5("Charts", className="card-title"),
                                         html.P("Bar, line, and donut charts with Plotly.", className="card-text text-muted"),
                                         dbc.Button("Go", href="/charts", color="primary", size="sm"),
-                                    ])
+                                    ]),
+                                    className="h-100",
                                 ),
                                 md=3,
                             ),
@@ -58,7 +61,8 @@ layout = dbc.Container(
                                         html.H5("Modal", className="card-title"),
                                         html.P("Bootstrap modal with open/close callback.", className="card-text text-muted"),
                                         dbc.Button("Go", href="/modal", color="primary", size="sm"),
-                                    ])
+                                    ]),
+                                    className="h-100",
                                 ),
                                 md=3,
                             ),
