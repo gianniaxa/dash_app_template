@@ -1,7 +1,16 @@
+import os
+from datetime import timedelta
+
 import dash
 import dash_bootstrap_components as dbc
 from dash import Dash, html, dcc
+from flask import redirect, request, session
 
+from auth import auth_routes, is_authenticated
+
+# ---------------------------------------------------------------------------
+# Dash app
+# ---------------------------------------------------------------------------
 app = Dash(
     __name__,
     use_pages=True,
@@ -11,6 +20,37 @@ app = Dash(
 
 server = app.server
 
+# ---------------------------------------------------------------------------
+# Flask / session config
+# ---------------------------------------------------------------------------
+server.config["SECRET_KEY"] = os.environ.get("FLASK_SECRET_KEY", "dev-secret-change-in-prod")
+server.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=60)
+server.config["SESSION_COOKIE_HTTPONLY"] = True
+server.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+if os.environ.get("STAGE") in ("preprod", "prod"):
+    server.config["SESSION_COOKIE_SECURE"] = True
+
+# ---------------------------------------------------------------------------
+# Auth blueprint
+# ---------------------------------------------------------------------------
+server.register_blueprint(auth_routes)
+
+# ---------------------------------------------------------------------------
+# Auth gate — redirect unauthenticated requests to /login
+# Exempt: /login page, /auth/* routes, and Dash's internal /_dash-* endpoints
+# ---------------------------------------------------------------------------
+EXEMPT_PREFIXES = ("/login", "/auth/", "/_dash-", "/assets/")
+
+@server.before_request
+def require_login():
+    if any(request.path.startswith(p) for p in EXEMPT_PREFIXES):
+        return
+    if not is_authenticated():
+        return redirect("/login")
+
+# ---------------------------------------------------------------------------
+# Navbar
+# ---------------------------------------------------------------------------
 navbar = dbc.Navbar(
     dbc.Container(
         [
@@ -32,6 +72,7 @@ navbar = dbc.Navbar(
                     dbc.NavItem(dbc.NavLink("Tables", href="/tables")),
                     dbc.NavItem(dbc.NavLink("Charts", href="/charts")),
                     dbc.NavItem(dbc.NavLink("Modal",  href="/modal")),
+                    dbc.NavItem(dbc.NavLink("Logout", href="/auth/logout", className="text-danger")),
                 ],
                 navbar=True,
             ),
@@ -42,6 +83,9 @@ navbar = dbc.Navbar(
     className="mb-4",
 )
 
+# ---------------------------------------------------------------------------
+# Layout
+# ---------------------------------------------------------------------------
 app.layout = html.Div(
     [
         dcc.Location(id="url"),

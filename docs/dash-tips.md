@@ -200,3 +200,61 @@ Output("my-grid", "rowData")
 ...
 return load_csv("users.csv")
 ```
+
+---
+
+## Security
+
+### SSL/TLS verification — always on
+
+Never disable SSL certificate verification when making HTTP requests. This applies everywhere in the codebase.
+
+```python
+# requests — correct
+import requests
+response = requests.get("https://api.example.com/data")       # verify=True is the default
+response = requests.get("https://api.example.com/data", verify=True)  # explicit
+
+# wrong — never do this
+response = requests.get("https://api.example.com/data", verify=False)  # ← disables verification
+
+# httpx — correct
+import httpx
+response = httpx.get("https://api.example.com/data")          # verify=True is the default
+
+# python3-saml metadata fetch — correct
+OneLogin_Saml2_IdPMetadataParser.parse_remote(url, validate_cert=True)
+```
+
+If a self-signed or internal CA certificate is needed (e.g. corporate proxy), pass the CA bundle path instead of disabling verification:
+
+```python
+requests.get("https://internal.example.com", verify="/path/to/ca-bundle.pem")
+```
+
+In Docker, mount the CA certificate and set the environment variable so Python libraries (`requests`, `httpx`) know where to find it — they use their own embedded CA bundle (`certifi`) and do not read the system store automatically:
+
+```yaml
+# docker-compose.yml
+environment:
+  - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-bundle.pem
+  - SSL_CERT_FILE=/etc/ssl/certs/ca-bundle.pem
+volumes:
+  - ./certs/my-ca.pem:/etc/ssl/certs/ca-bundle.pem
+```
+
+The mount makes the file available inside the container. The env variables tell Python where it is — without them, the file is present but ignored.
+
+**Alternative: inject into the system CA store via Dockerfile**
+
+If you prefer not to use env variables, you can bake the certificate into the image and update the system store. Python libraries still won't pick it up automatically, but you can update `certifi`'s own bundle as a final step:
+
+```dockerfile
+COPY certs/my-ca.pem /usr/local/share/ca-certificates/my-ca.crt
+RUN apt-get update && apt-get install -y ca-certificates \
+    && update-ca-certificates \
+    && cat /usr/local/share/ca-certificates/my-ca.crt \
+       >> $(python -c "import certifi; print(certifi.where())")
+```
+
+This appends your CA to `certifi`'s bundle so `requests` and `httpx` trust it without any env variables at runtime. Trade-off: the certificate is baked into the image and requires a rebuild to update.

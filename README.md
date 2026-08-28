@@ -85,12 +85,18 @@ dash_app_template/
 ├── secrets/
 │   └── env.secrets.example     # Copy to .env.secrets and fill in credentials
 └── src/
-    ├── app.py                  # App entry point, navbar, router
+    ├── app.py                  # App entry point, navbar, router, auth gate
     ├── pyproject.toml          # Dependencies (managed by uv)
+    ├── auth/                   # Authentication module
+    │   ├── __init__.py
+    │   ├── saml_auth.py        # Flask Blueprint: /auth/login, /auth/saml/acs/, /auth/logout
+    │   ├── saml_settings.py    # IdP URLs, role names, SAML config per stage
+    │   └── session.py          # Session helpers: is_authenticated(), get_user(), get_roles()
     ├── data/
     │   ├── users.csv           # User dummy data
     │   └── sales.csv           # Sales dummy data
     ├── pages/
+    │   ├── login.py            # /login — sign-in page
     │   ├── home.py             # /        — landing page with logo + component cards
     │   ├── form.py             # /form    — user entry form + live table
     │   ├── tables.py           # /tables  — AG Grid vs DataTable comparison
@@ -201,7 +207,52 @@ make_pie_chart(df, names="category", values="revenue", hole=0.4)
 
 ---
 
-## Data Utilities (`utils/data_loader.py`)
+## Authentication
+
+Authentication is handled by the `src/auth/` module and is transparent to pages and components.
+
+### Local (default — no login required)
+
+When `SSO_ENABLED` is not set, the app auto-signs in as `local-dev` with all roles. No credentials needed.
+
+```bash
+docker compose up --build
+# → opens directly on the app, no login prompt
+```
+
+### SSO / SAML (production)
+
+Set `SSO_ENABLED=true` in your environment or `secrets/.env.secrets`:
+
+```
+SSO_ENABLED=true
+STAGE=dev         # dev | preprod | prod
+FLASK_SECRET_KEY=<random string>
+SP_ENTITY_ID=my-app
+```
+
+Configure your IdP URLs and role group names in `src/auth/saml_settings.py`.
+
+`python3-saml` must be added to `pyproject.toml` (commented out by default — requires `libxml2-dev` and `libxmlsec1-dev` system packages):
+
+```bash
+cd src
+uv add python3-saml
+```
+
+### Using auth in pages
+
+```python
+from auth.session import is_authenticated, get_user, get_roles, has_role
+
+user = get_user()           # "C123456" or "local-dev"
+roles = get_roles()         # ["APP-ADMIN-DEV", ...]
+has_role("APP-ADMIN-DEV")   # True / False
+```
+
+---
+
+
 
 ```python
 from utils.data_loader import load_csv, save_csv

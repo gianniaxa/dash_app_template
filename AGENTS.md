@@ -92,6 +92,13 @@ dash_app_template/
 - `utils/db.py` loads this file automatically when present
 - In production, inject env vars directly — the secrets file is not needed
 
+### Security
+
+- **Never disable SSL verification** — `verify=False` and `validate_cert=False` are forbidden
+- For internal/corporate CAs, pass the CA bundle path: `verify="/path/to/ca.pem"` or set `REQUESTS_CA_BUNDLE` env var
+- Never hardcode credentials, tokens, or secrets anywhere in code
+- See `docs/dash-tips.md` → Security section for full examples
+
 ### README.md
 
 **After every change that affects the project, update `README.md` accordingly.**
