@@ -8,9 +8,9 @@ Two modes controlled by the SSO_ENABLED environment variable:
 
 Routes
 ------
-GET  /login          → start SSO flow (or dev bypass)
-POST /saml/acs/      → SAML Assertion Consumer Service (SSO only)
-GET  /logout         → clear session, redirect to login page
+GET  /auth/login     → start SSO flow (or dev bypass)
+POST /auth/saml/acs/ → SAML Assertion Consumer Service (SSO only)
+GET  /auth/logout    → clear session, redirect to the signed-out page
 """
 
 import os
@@ -56,6 +56,8 @@ if SSO_ENABLED:
     def login():
         auth = _init_saml_auth(_prepare_request(request))
         login_url = auth.login()
+        # Remember the request ID so acs() can verify InResponseTo
+        session["AuthNRequestID"] = auth.get_last_request_id()
         # Validate redirect host to prevent open redirect
         if urlparse(login_url).netloc != SSO_HOSTS[STAGE]:
             abort(400)
@@ -93,4 +95,4 @@ else:
 @auth_routes.route("/logout", methods=["GET"])
 def logout():
     session.clear()
-    return redirect("/login")
+    return redirect("/logout")

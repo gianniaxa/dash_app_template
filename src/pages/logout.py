@@ -4,7 +4,7 @@ import dash_bootstrap_components as dbc
 
 from auth.saml_settings import SSO_ENABLED
 
-dash.register_page(__name__, path="/login", name="Login")
+dash.register_page(__name__, path="/logout", name="Logout")
 
 layout = dbc.Container(
     dbc.Row(
@@ -17,9 +17,9 @@ layout = dbc.Container(
                             style={"width": "72px", "height": "72px"},
                             className="mb-4",
                         ),
-                        html.H3("My App", className="mb-1"),
+                        html.H3("Signed out", className="mb-1"),
                         html.P(
-                            "Sign in to continue.",
+                            "You have been signed out of My App.",
                             className="text-muted mb-4",
                         ),
                         dbc.Button(

@@ -28,11 +28,19 @@ IDP_METADATA_URLS: dict[str, str] = {
 # ---------------------------------------------------------------------------
 # Assertion Consumer Service (ACS) return URLs
 # Must be registered with your IdP as allowed redirect targets.
+# The path must match the route in saml_auth.py, including the blueprint's
+# "/auth" url_prefix — the IdP posts the assertion straight to this URL.
 # ---------------------------------------------------------------------------
+ACS_PATH = "/auth/saml/acs/"
+
+APP_HOSTS: dict[str, str] = {
+    "dev":     "app.dev.example.com",
+    "preprod": "app.acc.example.com",
+    "prod":    "app.example.com",
+}
+
 ACS_URLS: dict[str, str] = {
-    "dev":     "https://app.dev.example.com/saml/acs/",
-    "preprod": "https://app.acc.example.com/saml/acs/",
-    "prod":    "https://app.example.com/saml/acs/",
+    stage: f"https://{host}{ACS_PATH}" for stage, host in APP_HOSTS.items()
 }
 
 # ---------------------------------------------------------------------------

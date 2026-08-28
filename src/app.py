@@ -7,6 +7,7 @@ from dash import Dash, html, dcc
 from flask import redirect, request, session
 
 from auth import auth_routes, is_authenticated
+from auth.saml_settings import SSO_ENABLED
 
 # ---------------------------------------------------------------------------
 # Dash app
@@ -26,9 +27,16 @@ server = app.server
 server.config["SECRET_KEY"] = os.environ.get("FLASK_SECRET_KEY", "dev-secret-change-in-prod")
 server.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=60)
 server.config["SESSION_COOKIE_HTTPONLY"] = True
-server.config["SESSION_COOKIE_SAMESITE"] = "Lax"
-if os.environ.get("STAGE") in ("preprod", "prod"):
+if SSO_ENABLED:
+    # The IdP returns the assertion via a cross-site POST to the ACS route.
+    # "Lax" would withhold the cookie there, losing the AuthNRequestID that
+    # acs() needs for the InResponseTo check. "None" requires Secure.
+    server.config["SESSION_COOKIE_SAMESITE"] = "None"
     server.config["SESSION_COOKIE_SECURE"] = True
+else:
+    server.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+    if os.environ.get("STAGE") in ("preprod", "prod"):
+        server.config["SESSION_COOKIE_SECURE"] = True
 
 # ---------------------------------------------------------------------------
 # Auth blueprint
@@ -39,7 +47,7 @@ server.register_blueprint(auth_routes)
 # Auth gate — redirect unauthenticated requests to /login
 # Exempt: /login page, /auth/* routes, and Dash's internal /_dash-* endpoints
 # ---------------------------------------------------------------------------
-EXEMPT_PREFIXES = ("/login", "/auth/", "/_dash-", "/assets/")
+EXEMPT_PREFIXES = ("/login", "/logout", "/auth/", "/_dash-", "/assets/")
 
 @server.before_request
 def require_login():
@@ -72,7 +80,15 @@ navbar = dbc.Navbar(
                     dbc.NavItem(dbc.NavLink("Tables", href="/tables")),
                     dbc.NavItem(dbc.NavLink("Charts", href="/charts")),
                     dbc.NavItem(dbc.NavLink("Modal",  href="/modal")),
-                    dbc.NavItem(dbc.NavLink("Logout", href="/auth/logout", className="text-danger")),
+                    dbc.NavItem(
+                        dbc.NavLink(
+                            "Logout",
+                            href="/auth/logout",
+                            # Flask route, not a Dash page — bypass client-side routing
+                            external_link=True,
+                            className="text-danger",
+                        )
+                    ),
                 ],
                 navbar=True,
             ),
