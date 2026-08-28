@@ -14,11 +14,23 @@ server = app.server
 navbar = dbc.Navbar(
     dbc.Container(
         [
-            dbc.NavbarBrand("My App", href="/"),
+            dbc.NavbarBrand(
+                [
+                    html.Img(
+                        src="/assets/icons/logo.svg",
+                        height="30px",
+                        className="me-2",
+                    ),
+                    "My App",
+                ],
+                href="/",
+            ),
             dbc.Nav(
                 [
+                    dbc.NavItem(dbc.NavLink("Home",   href="/")),
                     dbc.NavItem(dbc.NavLink("Form",   href="/form")),
                     dbc.NavItem(dbc.NavLink("Tables", href="/tables")),
+                    dbc.NavItem(dbc.NavLink("Charts", href="/charts")),
                     dbc.NavItem(dbc.NavLink("Modal",  href="/modal")),
                 ],
                 navbar=True,
