@@ -1,5 +1,5 @@
 ---
-name: new-page
+name: dash-new-page
 description: Use when creating a new Dash page, adding a route, or registering a new page file under src/pages/. Covers the correct file structure, dash.register_page convention, callback placement, and navbar registration.
 ---
 

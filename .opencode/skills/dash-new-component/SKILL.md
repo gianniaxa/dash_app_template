@@ -1,5 +1,5 @@
 ---
-name: new-component
+name: dash-new-component
 description: Use when creating a new reusable Dash component, adding a factory function to src/components/, or when asked to build a widget, table, chart, form, or modal that should be reusable across pages.
 ---
 

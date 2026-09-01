@@ -1,5 +1,5 @@
 ---
-name: run-tests
+name: dash-run-tests
 description: Use when running, debugging, or writing pytest tests for this project. Covers how to run unit tests and integration tests, the mongomock setup, available fixtures, and where test files live.
 ---
 
