@@ -80,6 +80,18 @@ navbar = dbc.Navbar(
                     dbc.NavItem(dbc.NavLink("Tables", href="/tables")),
                     dbc.NavItem(dbc.NavLink("Charts", href="/charts")),
                     dbc.NavItem(dbc.NavLink("Modal",  href="/modal")),
+                    dbc.DropdownMenu(
+                        label="Themes",
+                        nav=True,
+                        children=[
+                            dbc.DropdownMenuItem("Flatly (Corporate)", href="/theme/flatly"),
+                            dbc.DropdownMenuItem("Darkly (Dark)", href="/theme/darkly"),
+                            dbc.DropdownMenuItem("Cyborg (High Contrast)", href="/theme/cyborg"),
+                            dbc.DropdownMenuItem(divider=True),
+                            dbc.DropdownMenuItem("Tailwind CSS", href="/theme/tailwind"),
+                            dbc.DropdownMenuItem("Mantine", href="/theme/mantine"),
+                        ],
+                    ),
                     dbc.NavItem(
                         dbc.NavLink(
                             "Logout",

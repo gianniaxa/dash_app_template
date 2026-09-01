@@ -7,37 +7,63 @@
 
 ## 1. Overview
 
-**App name:**
-<!-- e.g. "Employee Portal", "Sales Dashboard" -->
+**App name:** Succession Planning App
 
 **One-line description:**
-<!-- e.g. "Internal tool for HR to manage employee travel requests." -->
+Internal tool for employees and managers to manage succession planning — employees can view positions and express interest, managers can assign and evaluate candidates for key positions.
 
 **Target users:**
-<!-- Who will use this app? e.g. "HR managers and payroll team, ~20 users" -->
+All employees (~TBD users). Three roles: Employee, Manager, Admin.
 
 **Primary language:**
-<!-- e.g. English / German / French -->
+<!-- TODO: not yet clarified — German or English? -->
 
 ---
 
 ## 2. Pages
 
-<!-- List every page the app needs. One row per page. -->
-
 | Route | Name | Description |
 |---|---|---|
 | `/` | Home | Landing page / overview |
-| | | |
+| `/positions` | Positions | List of all relevant positions (Job Level >= 8) |
+| `/positions/<id>` | Position Detail | Details of a position; employees can express interest; managers see candidates |
+| `/my-interest` | My Interest | Employee view of their own expressed interests |
+| `/candidates` | Candidates (Manager) | Manager view of candidates assigned to their positions |
+| `/admin` | Admin | Admin management of positions, users, roles |
 
 ---
 
 ## 3. Features per Page
 
-<!-- For each page listed above, describe what it should do. -->
-
 ### Home (`/`)
-- ...
+- Overview / dashboard
+- Role-dependent content (TBD)
+
+### Positions (`/positions`)
+- All employees can see positions with Job Level >= 8
+- Filterable list (by department, level, etc.)
+- Manager sees only positions within their area (their level and below)
+- Each position shows: title, department, job level, current holder (TBD)
+
+### Position Detail (`/positions/<id>`)
+- All employees: view position details, express interest (button)
+- Employee sees only their own interest status (not other candidates)
+- Manager: sees list of assigned candidates with readiness rating
+- Manager: can add/remove candidates (from whole company, suggestions focused on similar areas)
+- Manager: can set readiness per candidate: "Ready Now", "Ready in 1-2 Years", "Ready in 3+ Years"
+
+### My Interest (`/my-interest`)
+- Employee sees list of positions they have expressed interest in
+- Can withdraw interest
+
+### Candidates (`/candidates`) — Manager only
+- Overview of all candidates assigned to manager's positions
+- Readiness ratings visible
+
+### Admin (`/admin`)
+- Manage positions (create, edit, delete)
+- Manage users and role assignments
+- Full access to all data
 
 ---
 
@@ -45,38 +71,64 @@
 
 ### Sources
 
-<!-- What data does the app work with? -->
-
 | Name | Type | Description |
 |---|---|---|
-| | CSV / PostgreSQL / MSSQL / API | |
+| Employees | <!-- TODO: SAP / AD / CSV / manual? --> | Employee master data |
+| Positions | <!-- TODO: same source or manual? --> | Position data |
 
 ### Key entities / tables
 
-<!-- Describe the main data models. Column name + type + description. -->
-
-#### Example: `users`
+#### `employees`
 | Column | Type | Description |
 |---|---|---|
 | id | int | Primary key |
 | name | string | Full name |
+| department | string | Department |
+| job_level | int | Job level (1-n) |
+| manager_id | int | FK to employees (their manager) |
+| role | enum | "employee", "manager", "admin" |
+
+#### `positions`
+| Column | Type | Description |
+|---|---|---|
+| id | int | Primary key |
+| title | string | Position title |
+| department | string | Department |
+| job_level | int | Job level (>= 8 relevant) |
+| current_holder_id | int | FK to employees |
+| status | enum | <!-- TODO: "vacant" vs "to be succeeded"? --> |
+
+#### `candidates`
+| Column | Type | Description |
+|---|---|---|
+| id | int | Primary key |
+| position_id | int | FK to positions |
+| employee_id | int | FK to employees |
+| readiness | enum | "ready_now", "ready_1_2_years", "ready_3plus_years" |
+| assigned_by | int | FK to employees (manager who assigned) |
+
+#### `interests`
+| Column | Type | Description |
+|---|---|---|
+| id | int | Primary key |
+| position_id | int | FK to positions |
+| employee_id | int | FK to employees |
+| created_at | datetime | Timestamp |
 
 ---
 
 ## 5. Components needed
 
-<!-- Check all that apply -->
-
-- [ ] Form (user input)
-- [ ] Table — AG Grid (large / complex data)
+- [x] Form (user input)
+- [x] Table — AG Grid (candidate lists, position lists)
 - [ ] Table — DataTable (simple data)
 - [ ] Bar chart
 - [ ] Line chart
 - [ ] Pie / Donut chart
-- [ ] Modal (popup)
-- [ ] Tabs (within a page)
+- [x] Modal (popup — e.g. add candidate, confirm interest)
+- [x] Tabs (within a page)
 - [ ] Date picker
-- [ ] Dropdown filter
+- [x] Dropdown filter
 - [ ] Other: ___
 
 ---
@@ -88,9 +140,11 @@
 - [ ] Yes — PostgreSQL
 - [ ] Yes — MSSQL
 
-**Schema / database name:**
+<!-- TODO: not yet clarified -->
 
-**Key tables:** (refer to section 4)
+**Schema / database name:** TBD
+
+**Key tables:** employees, positions, candidates, interests
 
 ---
 
@@ -99,22 +153,26 @@
 - [ ] None — open access
 - [ ] Basic login (username / password)
 - [ ] SSO / SAML
-- [ ] Role-based access (describe roles below)
+- [x] Role-based access
 
 **Roles:**
-<!-- e.g. "admin: full access, viewer: read-only" -->
+- `employee`: can view all positions (level >= 8), express interest, see own interests only
+- `manager`: can view positions in own area (own level and below), see and manage candidates (from whole company), see readiness ratings
+- `admin`: full access to all data and management functions
+
+**Manager scope:** A manager on level N sees all positions at level N and below (within their area).
 
 ---
 
 ## 8. Styling
 
 **Theme:**
-- [ ] Bootstrap default (dark navbar)
+- [x] Bootstrap default (dark navbar)
 - [ ] Other Bootstrap theme: ___
 - [ ] Custom colors: primary `#___`, secondary `#___`
 
 **Branding:**
-<!-- Logo, company name in navbar, etc. -->
+<!-- TODO: logo, company name? not yet clarified -->
 
 ---
 
@@ -124,18 +182,29 @@
 - [ ] Kubernetes / OpenShift
 - [ ] Cloud (specify: ___)
 
-**Port:** (default: 8050)
+<!-- TODO: not yet clarified -->
+
+**Port:** 8050 (default)
 
 ---
 
 ## 10. Out of scope
 
-<!-- Explicitly list what this app will NOT do in this version. -->
-- ...
+- Notifications / email alerts
+- Approval workflows
+- Performance ratings / competency assessments
+- Mobile-optimized UI
 
 ---
 
 ## 11. Open questions
 
-<!-- Anything unclear that needs to be decided before building. -->
-- ...
+- **Language:** German or English UI?
+- **Data source:** Where do employee/position data come from? (SAP, AD, CSV, manual entry?)
+- **Position status:** Distinction between vacant positions vs. occupied positions to be succeeded?
+- **Branding:** Logo, company name?
+- **Deployment:** Docker Compose, Kubernetes, or cloud?
+- **Database:** PostgreSQL or MSSQL?
+- **Manager candidate search:** How are "similar area" suggestions implemented — by department, by job family, by org hierarchy?
+- **Authentication mechanism:** Simple username/password or SSO?
+- **App name:** Final name for the app?

@@ -1,8 +1,9 @@
 ---
-name: build
-description: Build agent that reads SPEC.md and implements the Dash app by extending and adapting the template. Creates pages, components, data files, and wires everything together.
-mode: primary
+name: build-app
+description: Use when the user wants to build or implement the Dash app, says "build starten", "app bauen", or asks to implement features from SPEC.md. Reads SPEC.md and implements the app by creating pages, components, data files, and wiring everything together.
 ---
+
+# Build App Skill
 
 You are a senior Dash developer. Your job is to implement a Dash web application based on the specification in `SPEC.md` and the patterns established in this template project.
 
@@ -11,7 +12,7 @@ You are a senior Dash developer. Your job is to implement a Dash web application
 1. Read `SPEC.md` fully.
 2. Read `AGENTS.md` fully — it contains project conventions you must follow.
 3. Read the existing code in `src/` to understand the template structure.
-4. If `SPEC.md` is empty or has unanswered sections marked `...`, stop and tell the user to run the `spec` agent first.
+4. If `SPEC.md` is empty or has unanswered sections marked `...` or `<!-- TODO -->`, stop and tell the user to complete the spec first.
 
 ## Build process
 

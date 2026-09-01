@@ -11,6 +11,7 @@ dependencies = [
     "plotly==6.9.0",
     "python-dotenv==1.2.3",
     "sqlalchemy==2.0.51",
+    "dash-mantine-components==0.14.6",
     # SSO — only needed when SSO_ENABLED=true (production/staging)
     # Install manually: uv add python3-saml
     # Requires libxml2-dev and libxmlsec1-dev system packages
